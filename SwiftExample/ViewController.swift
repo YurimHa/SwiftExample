@@ -70,7 +70,30 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         
     }
     
-   
+
+    @IBAction func buttonDelete(_ sender: UIButton) {
+        
+        // readValues()
+        let DELETE_QUERY = "DELETE FROM Heroes WHERE id = (SELECT id FROM Heroes ORDER BY id DESC LIMIT 1);"
+        var stmt:OpaquePointer?
+                
+        print(DELETE_QUERY)
+        if sqlite3_prepare_v2(db, DELETE_QUERY, -1, &stmt, nil) != SQLITE_OK{
+            let errMsg = String(cString: sqlite3_errmsg(db)!)
+            print("error preparing delete: v1\(errMsg)")
+            return
+        }
+                
+        if sqlite3_step(stmt) != SQLITE_DONE {
+            let errMsg = String(cString : sqlite3_errmsg(db)!)
+            print("delete fail :: \(errMsg)")
+            return
+        }
+        sqlite3_finalize(stmt)
+    
+        readValues()
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return heroList.count
     }
